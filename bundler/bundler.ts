@@ -1,4 +1,5 @@
 import * as kl from "kolorist";
+import * as logger from "./logger.ts";
 
 export interface Plugin {
   name: string;
@@ -41,9 +42,7 @@ export async function bundle(options: BundleOptions): Promise<void> {
 
   for (let i = 0; i < options.entrypoints.length; i++) {
     const entry = options.entrypoints[i];
-    console.log(
-      `${kl.magenta("[bundler]")} bundling entrypoint ${prettySpecifier(entry)}`
-    );
+    logger.logBundlingEntry(entry);
 
     const resolved = cache.get(entry)!;
     const sorted = topoSort(graph, resolved);
@@ -62,7 +61,7 @@ export async function bundle(options: BundleOptions): Promise<void> {
     console.log(kl.dim(bundle));
   }
 
-  console.log(`Finished in ${kl.green(`${performance.now().toFixed(2)}ms`)}`);
+  logger.logFinished();
 }
 
 async function resolveAndLoad(
@@ -81,7 +80,7 @@ async function resolveAndLoad(
     if (plugin.load) {
       let content = await plugin.load(resolved);
       if (content) {
-        logLoaded(plugin.name, resolved, content);
+        logger.logLoaded(plugin.name, resolved, content);
 
         // Get potential new specifiers to resolve
         // We'll only do static imports for now
@@ -106,7 +105,7 @@ async function resolveAndLoad(
 
         break;
       } else {
-        logNoLoad(plugin.name, resolved);
+        logger.logNoLoad(plugin.name, resolved);
       }
     }
   }
@@ -126,16 +125,16 @@ async function resolvePlugins(
 
     if (resolved) {
       if (resolved === id) {
-        logResolvedFinished(plugin.name, resolved);
+        logger.logResolvedFinished(plugin.name, resolved);
         // Terminate resolution
         return resolved;
       }
 
-      logResolved(plugin.name, id, resolved);
+      logger.logResolved(plugin.name, id, resolved);
 
       return await resolvePlugins(plugins, resolved, referrer);
     } else {
-      logNoResolved(plugin.name, id);
+      logger.logNoResolved(plugin.name, id);
     }
   }
 
@@ -163,53 +162,4 @@ function topoSort(graph: Graph, entry: string) {
   visit(entry);
 
   return sorted;
-}
-
-const logPlugin = kl.ansi256(202);
-function logResolved(pluginName: string, from: string, to: string) {
-  console.log(
-    `${kl.magenta("[resolve]")} ${logPlugin(pluginName)}: ${prettySpecifier(
-      from
-    )} -> ${prettySpecifier(to)}`
-  );
-}
-
-function logResolvedFinished(pluginName: string, from: string) {
-  console.log(
-    `${kl.magenta("[resolve]")} ${logPlugin(
-      pluginName
-    )}: finished resolution ${prettySpecifier(from)}`
-  );
-}
-
-function logNoResolved(pluginName: string, id: string) {
-  console.log(
-    `${kl.magenta("[resolve]")} ${logPlugin(
-      pluginName
-    )}: could not resolve ${prettySpecifier(id)}, trying next plugin...`
-  );
-}
-
-function logNoLoad(pluginName: string, id: string) {
-  console.log(
-    `${kl.lightBlue("[load]")} ${logPlugin(
-      pluginName
-    )}: Could not load ${prettySpecifier(id)}, trying next plugin...`
-  );
-}
-
-function logLoaded(pluginName: string, id: string, content: string) {
-  console.log(
-    `${kl.lightBlue("[load]")} ${logPlugin(
-      pluginName
-    )}: Loaded ${prettySpecifier(id)}\n${kl.dim(content).trim()}`
-  );
-}
-
-function prettySpecifier(spec: string): string {
-  if (spec.startsWith("\0")) {
-    spec = `\\0${spec.slice(1)}`;
-  }
-
-  return kl.cyan(spec);
 }
