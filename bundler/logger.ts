@@ -37,7 +37,7 @@ export function logLoaded(pluginName: string, id: string, content: string) {
   console.log(
     `${kl.lightBlue("[load]")} ${logPlugin(
       pluginName
-    )}: Loaded ${prettySpecifier(id)}\n${kl.dim(content).trim()}`
+    )}: Loaded ${prettySpecifier(id)}\n${content.trim()}`
   );
 }
 

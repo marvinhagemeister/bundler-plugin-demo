@@ -58,7 +58,7 @@ export async function bundle(options: BundleOptions): Promise<void> {
       .replaceAll(/^export\s(const|let|var)/gm, "$1")
       .replace(/\n+$/, "\n");
 
-    console.log(kl.dim(bundle));
+    console.log(bundle);
   }
 
   logger.logFinished();
