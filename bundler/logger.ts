@@ -1,5 +1,11 @@
 import * as kl from "kolorist";
 
+export function logResolving(spec: string) {
+  console.log(
+    `${kl.magenta("[resolve]")} resolving... ${prettySpecifier(spec)}`
+  );
+}
+
 const logPlugin = kl.ansi256(202);
 export function logResolved(pluginName: string, from: string, to: string) {
   console.log(
@@ -13,7 +19,7 @@ export function logResolvedFinished(pluginName: string, from: string) {
   console.log(
     `${kl.magenta("[resolve]")} ${logPlugin(
       pluginName
-    )}: finished resolution ${prettySpecifier(from)}`
+    )}: success resolution ${prettySpecifier(from)}`
   );
 }
 

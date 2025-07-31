@@ -71,6 +71,8 @@ async function resolveAndLoad(
   id: string,
   referrer: string | null
 ): Promise<string> {
+  logger.logResolving(id);
+
   const resolved = await resolvePlugins(plugins, id, referrer);
   if (!resolved) throw new Error(`Could not resolve ${id}`);
 
