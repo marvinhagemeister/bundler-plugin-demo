@@ -1,4 +1,3 @@
-import * as kl from "kolorist";
 import * as logger from "./logger.ts";
 
 export interface Plugin {
